@@ -1,126 +1,141 @@
-import axios from 'axios';
-
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-api.interceptors.request.use((config) => {
+// Helper function to make API calls with fetch
+const apiCall = async (endpoint, options = {}) => {
   const token = localStorage.getItem('access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const url = `${API_BASE_URL}${endpoint}`;
+  
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
+    ...options,
+  };
+
+  if (config.body && typeof config.body === 'object') {
+    config.body = JSON.stringify(config.body);
   }
-  return config;
-});
+
+  try {
+    const response = await fetch(url, config);
+    const data = await response.json().catch(() => ({}));
+    
+    return {
+      data,
+      status: response.status,
+      ok: response.ok,
+    };
+  } catch (error) {
+    throw new Error(`API call failed: ${error.message}`);
+  }
+};
 
 // Authentication Endpoints
 export const signup = (userData) => 
-  api.post('/auth/signup', userData);
+  apiCall('/auth/signup', { method: 'POST', body: userData });
 
 export const login = (credentials) => 
-  api.post('/auth/login', credentials);
+  apiCall('/auth/login', { method: 'POST', body: credentials });
 
 export const verifyToken = () => 
-  api.get('/auth/verify-token');
+  apiCall('/auth/verify-token');
 
 // User Endpoints
 export const getUserProfile = () => 
-  api.get('/user/profile');
+  apiCall('/user/profile');
 
 export const updateUserProfile = (data) => 
-  api.put('/user/profile', data);
+  apiCall('/user/profile', { method: 'PUT', body: data });
 
 export const changePassword = (passwordData) => 
-  api.post('/user/change-password', passwordData);
+  apiCall('/user/change-password', { method: 'POST', body: passwordData });
 
 export const getUserPlans = () => 
-  api.get('/user/plans');
+  apiCall('/user/plans');
 
 export const getPlanById = (planId) => 
-  api.get(`/user/plans/${planId}`);
+  apiCall(`/user/plans/${planId}`);
 
 export const getUserSubscriptions = () => 
-  api.get('/user/subscriptions');
+  apiCall('/user/subscriptions');
 
 export const getSubscriptionById = (subscriptionId) => 
-  api.get(`/user/subscriptions/${subscriptionId}`);
+  apiCall(`/user/subscriptions/${subscriptionId}`);
 
 export const createSubscription = (subscriptionData) => 
-  api.post('/user/subscriptions', subscriptionData);
+  apiCall('/user/subscriptions', { method: 'POST', body: subscriptionData });
 
 export const cancelSubscription = (subscriptionId, reason) => 
-  api.post(`/user/subscriptions/${subscriptionId}/cancel`, { reason });
+  apiCall(`/user/subscriptions/${subscriptionId}/cancel`, { method: 'POST', body: { reason } });
 
 export const toggleAutoRenew = (subscriptionId, autoRenew) => 
-  api.put(`/user/subscriptions/${subscriptionId}/auto-renew`, { auto_renew: autoRenew });
+  apiCall(`/user/subscriptions/${subscriptionId}/auto-renew`, { method: 'PUT', body: { auto_renew: autoRenew } });
 
 export const validateDiscountCode = (code) => 
-  api.post('/user/discounts/validate', { code });
+  apiCall('/user/discounts/validate', { method: 'POST', body: { code } });
 
 export const applyDiscount = (subscriptionId, code) => 
-  api.post(`/user/subscriptions/${subscriptionId}/apply-discount`, { code });
+  apiCall(`/user/subscriptions/${subscriptionId}/apply-discount`, { method: 'POST', body: { code } });
 
 export const getUserNotifications = (limit = 50) => 
-  api.get(`/user/notifications?limit=${limit}`);
+  apiCall(`/user/notifications?limit=${limit}`);
 
 export const markNotificationRead = (notificationId) => 
-  api.put(`/user/notifications/${notificationId}/read`);
+  apiCall(`/user/notifications/${notificationId}/read`, { method: 'PUT' });
 
 export const getUnreadNotificationCount = () => 
-  api.get('/user/notifications/unread-count');
+  apiCall('/user/notifications/unread-count');
 
 export const getUserDashboard = () => 
-  api.get('/user/dashboard');
+  apiCall('/user/dashboard');
 
 // Admin Endpoints
 export const getAdminDashboard = () => 
-  api.get('/admin/dashboard');
+  apiCall('/admin/dashboard');
 
 export const getAdminUsers = () => 
-  api.get('/admin/users');
+  apiCall('/admin/users');
 
 export const getAdminUserById = (userId) => 
-  api.get(`/admin/users/${userId}`);
+  apiCall(`/admin/users/${userId}`);
 
 export const updateAdminUser = (userId, data) => 
-  api.put(`/admin/users/${userId}`, data);
+  apiCall(`/admin/users/${userId}`, { method: 'PUT', body: data });
 
 export const deleteAdminUser = (userId) => 
-  api.delete(`/admin/users/${userId}`);
+  apiCall(`/admin/users/${userId}`, { method: 'DELETE' });
 
 export const getAdminPlans = () => 
-  api.get('/admin/plans');
+  apiCall('/admin/plans');
 
 export const createAdminPlan = (planData) => 
-  api.post('/admin/plans', planData);
+  apiCall('/admin/plans', { method: 'POST', body: planData });
 
 export const updateAdminPlan = (planId, data) => 
-  api.put(`/admin/plans/${planId}`, data);
+  apiCall(`/admin/plans/${planId}`, { method: 'PUT', body: data });
 
 export const deleteAdminPlan = (planId) => 
-  api.delete(`/admin/plans/${planId}`);
+  apiCall(`/admin/plans/${planId}`, { method: 'DELETE' });
 
 export const getAdminSubscriptions = (status = 'all') => 
-  api.get(`/admin/subscriptions?status=${status}`);
+  apiCall(`/admin/subscriptions?status=${status}`);
 
 export const getAdminSubscriptionById = (subscriptionId) => 
-  api.get(`/admin/subscriptions/${subscriptionId}`);
+  apiCall(`/admin/subscriptions/${subscriptionId}`);
 
 export const cancelAdminSubscription = (subscriptionId, reason) => 
-  api.post(`/admin/subscriptions/${subscriptionId}/cancel`, { reason });
+  apiCall(`/admin/subscriptions/${subscriptionId}/cancel`, { method: 'POST', body: { reason } });
 
 export const getAdminDiscounts = () => 
-  api.get('/admin/discounts');
+  apiCall('/admin/discounts');
 
 export const createAdminDiscount = (discountData) => 
-  api.post('/admin/discounts', discountData);
+  apiCall('/admin/discounts', { method: 'POST', body: discountData });
 
 export const sendAdminNotification = (notificationData) => 
-  api.post('/admin/notifications/send', notificationData);
+  apiCall('/admin/notifications/send', { method: 'POST', body: notificationData });
 
 // Legacy exports for backward compatibility
 export const createUser = signup;
@@ -129,4 +144,5 @@ export const createPlan = createAdminPlan;
 export const updatePlan = updateAdminPlan;
 export const deletePlan = deleteAdminPlan;
 
+const api = { apiCall };
 export default api;
