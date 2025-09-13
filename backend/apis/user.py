@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from handler import get_all_plans, get_user_by_id, get_subscriptions_by_user
+from handler import get_all_plans, get_user_by_id, get_subscriptions_by_user, get_plan_by_id, create_subscription
 
 user = Blueprint('user', __name__, url_prefix='/user')
 
@@ -69,6 +69,32 @@ def get_user_plans():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
+@user.route('/plans/<int:plan_id>', methods=['GET'])
+def get_user_plan_by_id(plan_id):
+    """Get specific plan details"""
+    try:
+        plan = get_plan_by_id(plan_id)
+        if not plan:
+            return jsonify({'success': False, 'message': 'Plan not found'}), 404
+        
+        plan_data = {
+            'plan_id': plan[0],
+            'plan_name': plan[1],
+            'plan_description': plan[2],
+            'price': plan[3],
+            'duration_months': plan[4],
+            'features': plan[5],
+            'is_active': plan[6]
+        }
+        
+        return jsonify({
+            'success': True,
+            'data': plan_data
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 @user.route('/subscriptions', methods=['GET'])
 @jwt_required()
 def get_user_subscriptions():
@@ -113,22 +139,51 @@ def create_user_subscription():
         
         data = request.get_json()
         plan_id = data.get('plan_id')
+        title = data.get('title', '')
+        billing_cycle = data.get('billing_cycle', 'monthly')
+        auto_renew = data.get('auto_renew', True)
+        payment_method = data.get('payment_method', 'credit_card')
         
         if not plan_id:
             return jsonify({'success': False, 'message': 'Plan ID is required'}), 400
         
-        # Mock subscription creation - implement actual logic
-        return jsonify({
-            'success': True,
-            'message': 'Subscription created successfully',
-            'data': {
-                'subscription_id': 1,
-                'plan_name': 'Basic Plan',
-                'start_date': '2024-01-01',
-                'end_date': '2024-02-01',
-                'status': 'Active'
-            }
-        }), 201
+        # Get plan details to validate
+        plan = get_plan_by_id(plan_id)
+        if not plan:
+            return jsonify({'success': False, 'message': 'Plan not found'}), 404
+        
+        # Calculate dates
+        from datetime import datetime, timedelta
+        start_date = datetime.now().strftime('%Y-%m-%d')
+        end_date = (datetime.now() + timedelta(days=30 * plan[4])).strftime('%Y-%m-%d')
+        
+        # Create subscription
+        subscription_id = create_subscription(
+            user_id=current_user['user_id'],
+            plan_id=plan_id,
+            start_date=start_date,
+            end_date=end_date,
+            status='Active',
+            auto_renew=1 if auto_renew else 0
+        )
+        
+        if subscription_id:
+            return jsonify({
+                'success': True,
+                'message': 'Subscription created successfully',
+                'data': {
+                    'subscription_id': subscription_id,
+                    'plan_name': plan[1],
+                    'start_date': start_date,
+                    'end_date': end_date,
+                    'status': 'Active',
+                    'auto_renew': auto_renew,
+                    'billing_cycle': billing_cycle,
+                    'price': plan[3]
+                }
+            }), 201
+        else:
+            return jsonify({'success': False, 'message': 'Failed to create subscription'}), 500
         
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500

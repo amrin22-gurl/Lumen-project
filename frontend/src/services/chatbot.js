@@ -1,7 +1,13 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const API_KEY = process.env.REACT_APP_GEMINI_API_KEY || 'AIzaSyBviM_wdZOp1EaEv1FkEDrtRKpeNHSpVfI';
-const genAI = new GoogleGenerativeAI(API_KEY);
+
+let genAI = null;
+try {
+  genAI = new GoogleGenerativeAI(API_KEY);
+} catch (error) {
+  console.error('Failed to initialize Google Generative AI:', error);
+}
 
 // Chatbot boundaries and context
 const CHATBOT_CONTEXT = `
@@ -44,11 +50,27 @@ Remember: You are specifically for telecom subscription management assistance on
 
 class ChatbotService {
   constructor() {
-    this.model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    this.model = null;
     this.chatHistory = [];
+    this.isAvailable = false;
+    
+    try {
+      if (genAI) {
+        this.model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+        this.isAvailable = true;
+      }
+    } catch (error) {
+      console.error('Failed to initialize chatbot model:', error);
+      this.isAvailable = false;
+    }
   }
 
   async sendMessage(userMessage) {
+    // Check if chatbot is available
+    if (!this.isAvailable || !this.model) {
+      return this.getFallbackResponse(userMessage);
+    }
+
     try {
       // Add context and boundaries to the conversation
       const contextualMessage = `${CHATBOT_CONTEXT}\n\nUser: ${userMessage}`;
@@ -85,12 +107,52 @@ class ChatbotService {
 
     } catch (error) {
       console.error('Chatbot error:', error);
+      return this.getFallbackResponse(userMessage);
+    }
+  }
+
+  getFallbackResponse(userMessage) {
+    const lowerMessage = userMessage.toLowerCase();
+    
+    // Simple keyword-based responses as fallback
+    if (lowerMessage.includes('plan') || lowerMessage.includes('price')) {
       return {
-        success: false,
-        message: 'I apologize, but I\'m having trouble responding right now. Please try again or contact our support team for assistance.',
+        success: true,
+        message: 'We offer two main plans:\n\n• Basic Plan: $29.99/month - Entry-level internet with 24/7 support\n• Premium Plan: $59.99/month - High-speed internet with unlimited data and router included\n\nWould you like more details about either plan?',
         timestamp: new Date().toISOString()
       };
     }
+    
+    if (lowerMessage.includes('upgrade') || lowerMessage.includes('change')) {
+      return {
+        success: true,
+        message: 'To upgrade your plan, you can:\n1. Log into your account and go to "My Subscription"\n2. Select "Upgrade Plan"\n3. Choose your new plan\n4. Confirm the changes\n\nOr contact our support team for assistance.',
+        timestamp: new Date().toISOString()
+      };
+    }
+    
+    if (lowerMessage.includes('cancel')) {
+      return {
+        success: true,
+        message: 'To cancel your subscription:\n1. Log into your account\n2. Go to "My Subscription"\n3. Click "Cancel Subscription"\n4. Follow the cancellation process\n\nNote: You can cancel anytime, and your service will continue until the end of your billing period.',
+        timestamp: new Date().toISOString()
+      };
+    }
+    
+    if (lowerMessage.includes('support') || lowerMessage.includes('help')) {
+      return {
+        success: true,
+        message: 'I\'m here to help with telecom-related questions! You can ask me about:\n\n• Plans and pricing\n• Subscription management\n• Billing questions\n• Technical support\n• Account management\n\nFor complex account-specific issues, please contact our human support team.',
+        timestamp: new Date().toISOString()
+      };
+    }
+    
+    // Default fallback response
+    return {
+      success: false,
+      message: 'I\'m currently experiencing technical difficulties with AI responses. However, I can still help with basic questions about our telecom plans and services. Please try asking about plans, upgrades, cancellations, or contact our support team for detailed assistance.',
+      timestamp: new Date().toISOString()
+    };
   }
 
   clearHistory() {

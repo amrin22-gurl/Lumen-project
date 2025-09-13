@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Plans from './pages/Plans';
 import Subscription from './pages/Subscription';
+import Subscribe from './pages/Subscribe';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminPlans from './pages/AdminPlans';
 import ChatSupport from './pages/ChatSupport';
@@ -26,6 +27,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/plans" element={<Plans />} />
               <Route path="/subscription" element={<Subscription />} />
+              <Route path="/subscribe" element={<Subscribe />} />
               <Route path="/admin-dashboard" element={<AdminDashboard />} />
               <Route path="/admin-plans" element={<AdminPlans />} />
               <Route path="/support" element={<ChatSupport />} />

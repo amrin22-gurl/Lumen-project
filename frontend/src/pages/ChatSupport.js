@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import chatbotService from '../services/chatbot';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 const ChatSupport = () => {
   const [messages, setMessages] = useState([
@@ -95,7 +96,8 @@ const ChatSupport = () => {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <ErrorBoundary fallbackMessage="Chat support is temporarily unavailable. Please try refreshing the page or contact our support team directly.">
+      <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Header */}
         <div className="bg-blue-600 text-white p-6">
@@ -209,6 +211,7 @@ const ChatSupport = () => {
         </div>
       </div>
     </div>
+    </ErrorBoundary>
   );
 };
 

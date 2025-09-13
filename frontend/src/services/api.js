@@ -52,6 +52,9 @@ export const getSubscriptionById = (subscriptionId) =>
 export const createSubscription = (subscriptionData) => 
   api.post('/user/subscriptions', subscriptionData);
 
+export const getPlanById = (planId) => 
+  api.get(`/user/plans/${planId}`);
+
 export const cancelSubscription = (subscriptionId, reason) => 
   api.post(`/user/subscriptions/${subscriptionId}/cancel`, { reason });
 

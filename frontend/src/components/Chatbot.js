@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import chatbotService from '../services/chatbot';
+import ErrorBoundary from './ErrorBoundary';
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,11 +35,12 @@ const Chatbot = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentMessage = inputMessage;
     setInputMessage('');
     setIsLoading(true);
 
     try {
-      const response = await chatbotService.sendMessage(inputMessage);
+      const response = await chatbotService.sendMessage(currentMessage);
       
       const botMessage = {
         id: Date.now() + 1,
@@ -49,9 +51,10 @@ const Chatbot = () => {
 
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
+      console.error('Chat error:', error);
       const errorMessage = {
         id: Date.now() + 1,
-        text: 'Sorry, I encountered an error. Please try again.',
+        text: 'I\'m sorry, I\'m having technical difficulties. Please try again or contact our support team for assistance.',
         sender: 'bot',
         timestamp: new Date().toISOString()
       };
@@ -75,7 +78,7 @@ const Chatbot = () => {
   const quickResponses = chatbotService.getQuickResponses();
 
   return (
-    <>
+    <ErrorBoundary fallbackMessage="Chat service is temporarily unavailable. Please try refreshing the page.">
       {/* Chatbot Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -179,7 +182,7 @@ const Chatbot = () => {
           </div>
         </div>
       )}
-    </>
+    </ErrorBoundary>
   );
 };
 

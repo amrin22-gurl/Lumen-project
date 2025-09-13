@@ -70,7 +70,7 @@ const Plans = () => {
                 if (!user) {
                   window.location.href = '/login';
                 } else {
-                  alert('Subscription feature coming soon!');
+                  window.location.href = `/subscribe?planId=${plan.plan_id}`;
                 }
               }}
             >
