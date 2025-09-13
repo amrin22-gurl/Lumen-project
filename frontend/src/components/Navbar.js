@@ -15,8 +15,14 @@ const Navbar = () => {
             </Link>
           </div>
           <div className="flex items-center space-x-4">
+            <Link to="/plans" className="text-gray-700 hover:text-blue-600">
+              Plans
+            </Link>
             {user ? (
               <>
+                <Link to="/subscription" className="text-gray-700 hover:text-blue-600">
+                  My Subscription
+                </Link>
                 <span className="text-gray-700">Welcome, {user.name}</span>
                 <button
                   onClick={logout}
