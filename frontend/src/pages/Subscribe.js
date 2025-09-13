@@ -21,16 +21,13 @@ const Subscribe = () => {
   });
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
     const fetchPlan = async () => {
       try {
         if (planId) {
           const response = await getPlanById(planId);
           setSelectedPlan(response.data.data);
+        } else {
+          setError('No plan selected');
         }
       } catch (error) {
         console.error('Error fetching plan:', error);
@@ -40,8 +37,12 @@ const Subscribe = () => {
       }
     };
 
-    fetchPlan();
-  }, [planId, user, navigate]);
+    if (user) {
+      fetchPlan();
+    } else {
+      setLoading(false);
+    }
+  }, [planId, user]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -90,7 +91,13 @@ const Subscribe = () => {
   if (!user) {
     return (
       <div className="text-center py-8">
-        <p>Please log in to subscribe to a plan.</p>
+        <p className="mb-4">Please log in to subscribe to a plan.</p>
+        <button 
+          onClick={() => navigate('/login')}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Go to Login
+        </button>
       </div>
     );
   }
@@ -118,8 +125,18 @@ const Subscribe = () => {
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Header */}
         <div className="bg-blue-600 text-white p-6">
-          <h1 className="text-2xl font-bold">Subscribe to Plan</h1>
-          <p className="text-blue-100">Complete your subscription setup</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold">Subscribe to Plan</h1>
+              <p className="text-blue-100">Complete your subscription setup</p>
+            </div>
+            <button
+              onClick={() => navigate('/plans')}
+              className="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded text-sm"
+            >
+              Back to Plans
+            </button>
+          </div>
         </div>
 
         <div className="p-6">
