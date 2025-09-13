@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }) => {
   const getRoleBasedRoute = (role) => {
     switch (role) {
       case 'admin': return '/admin-dashboard';
+      case 'customer': return '/subscription';
       default: return '/subscription';
     }
   };

@@ -14,34 +14,56 @@ const Register = () => {
     setError('');
     setSuccess('');
 
-    const formData = new FormData(e.target);
-    const name = formData.get('name');
-    const email = formData.get('email');
-    const password = formData.get('password');
+    try {
+      const formData = new FormData(e.target);
+      const name = formData.get('name');
+      const email = formData.get('email');
+      const password = formData.get('password');
 
-    // Basic validation
-    if (!name || !email || !password) {
-      setError('All fields are required');
-      setLoading(false);
-      return;
-    }
+      console.log('Registration attempt:', { name, email });
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      setLoading(false);
-      return;
-    }
+      // Basic validation
+      if (!name || !email || !password) {
+        setError('All fields are required');
+        setLoading(false);
+        return;
+      }
 
-    // Simulate API delay
-    setTimeout(() => {
-      setSuccess('Registration successful! You can now login.');
-      setLoading(false);
-      
-      // Redirect to login after 2 seconds
+      if (name.length < 2) {
+        setError('Name must be at least 2 characters');
+        setLoading(false);
+        return;
+      }
+
+      if (password.length < 6) {
+        setError('Password must be at least 6 characters');
+        setLoading(false);
+        return;
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        setError('Please enter a valid email address');
+        setLoading(false);
+        return;
+      }
+
+      // Simulate API delay
       setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-    }, 500);
+        setSuccess('Registration successful! Redirecting to login...');
+        setLoading(false);
+        
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      }, 500);
+    } catch (error) {
+      console.error('Registration error:', error);
+      setError('Registration failed. Please try again.');
+      setLoading(false);
+    }
   };
 
   const fields = [

@@ -20,39 +20,64 @@ const Login = () => {
     setLoading(true);
     setError('');
 
-    const formData = new FormData(e.target);
-    const email = formData.get('email');
-    const password = formData.get('password');
-    const selectedRole = formData.get('role');
+    try {
+      const formData = new FormData(e.target);
+      const email = formData.get('email');
+      const password = formData.get('password');
+      const selectedRole = formData.get('role');
 
-    // Mock authentication
-    const mockUser = MOCK_USERS[email];
-    if (!mockUser || mockUser.password !== password) {
-      setError('Invalid email or password');
+      console.log('Login attempt:', { email, selectedRole });
+
+      // Validate inputs
+      if (!email || !password || !selectedRole) {
+        setError('All fields are required');
+        setLoading(false);
+        return;
+      }
+
+      // Mock authentication
+      const mockUser = MOCK_USERS[email];
+      if (!mockUser) {
+        setError('User not found');
+        setLoading(false);
+        return;
+      }
+
+      if (mockUser.password !== password) {
+        setError('Invalid password');
+        setLoading(false);
+        return;
+      }
+
+      if (mockUser.role !== selectedRole) {
+        setError(`This account is registered as ${mockUser.role}, not ${selectedRole}`);
+        setLoading(false);
+        return;
+      }
+
+      // Simulate API delay
+      setTimeout(() => {
+        const mockToken = 'mock_token_' + Date.now();
+        const userData = {
+          id: email,
+          email: email,
+          name: mockUser.name,
+          role: mockUser.role
+        };
+        
+        console.log('Login successful:', userData);
+        login(mockToken, userData);
+        
+        const route = getRoleBasedRoute(mockUser.role);
+        console.log('Navigating to:', route);
+        navigate(route);
+        setLoading(false);
+      }, 500);
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Login failed. Please try again.');
       setLoading(false);
-      return;
     }
-
-    if (mockUser.role !== selectedRole) {
-      setError('Invalid role selection for this account');
-      setLoading(false);
-      return;
-    }
-
-    // Simulate API delay
-    setTimeout(() => {
-      const mockToken = 'mock_token_' + Date.now();
-      const userData = {
-        id: email,
-        email: email,
-        name: mockUser.name,
-        role: mockUser.role
-      };
-      
-      login(mockToken, userData);
-      navigate(getRoleBasedRoute(mockUser.role));
-      setLoading(false);
-    }, 500);
   };
 
   const fields = [
