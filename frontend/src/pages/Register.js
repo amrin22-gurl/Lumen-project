@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { createUser, createCompany } from '../services/api';
+import { createUser } from '../services/api';
 import AuthForm from '../components/AuthForm';
 
 const Register = () => {
@@ -18,21 +18,11 @@ const Register = () => {
       name: formData.get('name'),
       email: formData.get('email'),
       password: formData.get('password'),
-      role: formData.get('role')
+      role: 'user'
     };
 
     try {
-      const userResponse = await createUser(userData);
-      
-      // If company role, create company
-      if (userData.role === 'company') {
-        const companyData = {
-          name: formData.get('companyName'),
-          owner_id: userResponse.data.id
-        };
-        await createCompany(companyData);
-      }
-
+      await createUser(userData);
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.detail || 'Registration failed');
@@ -62,24 +52,6 @@ const Register = () => {
       placeholder: 'Password',
       required: true,
       label: 'Password'
-    },
-    {
-      name: 'role',
-      type: 'select',
-      label: 'Account Type',
-      required: true,
-      defaultValue: 'user',
-      options: [
-        { value: 'user', label: 'End User' },
-        { value: 'company', label: 'Company Admin' }
-      ]
-    },
-    {
-      name: 'companyName',
-      type: 'text',
-      placeholder: 'Company name (for company accounts)',
-      required: false,
-      label: 'Company Name'
     }
   ];
 
