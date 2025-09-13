@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { createUser } from '../services/api';
+import { signup } from '../services/api';
 import AuthForm from '../components/AuthForm';
 
 const Register = () => {
@@ -22,10 +22,11 @@ const Register = () => {
     };
 
     try {
-      await createUser(userData);
+      const response = await signup(userData);
+      localStorage.setItem('access_token', response.data.access_token);
       navigate('/login');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Registration failed');
+      setError(err.response?.data?.message || 'Registration failed');
     } finally {
       setLoading(false);
     }

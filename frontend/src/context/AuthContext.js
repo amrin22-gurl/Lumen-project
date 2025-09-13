@@ -10,14 +10,18 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('access_token');
     if (token) {
-      verifyToken(token)
+      verifyToken()
         .then(response => {
-          setUser(response.data.user);
+          if (response.data.valid) {
+            setUser(response.data.user);
+          } else {
+            localStorage.removeItem('access_token');
+          }
         })
         .catch(() => {
-          localStorage.removeItem('token');
+          localStorage.removeItem('access_token');
         })
         .finally(() => {
           setLoading(false);
@@ -28,20 +32,19 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (token, userData) => {
-    localStorage.setItem('token', token);
+    localStorage.setItem('access_token', token);
     setUser(userData);
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('access_token');
     setUser(null);
   };
 
   const getRoleBasedRoute = (role) => {
     switch (role) {
-      case 'admin': return '/admin/dashboard';
-      case 'company': return '/admin/plans';
-      default: return '/plans';
+      case 'admin': return '/admin-plans';
+      default: return '/subscription';
     }
   };
 

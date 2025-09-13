@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { createAccessToken } from '../services/api';
+import { login as apiLogin } from '../services/api';
 import AuthForm from '../components/AuthForm';
 
 const Login = () => {
@@ -21,13 +21,13 @@ const Login = () => {
     const role = formData.get('role');
 
     try {
-      const response = await createAccessToken(email, password);
+      const response = await apiLogin({ email, password });
       const { access_token, user } = response.data;
       
-      login(access_token, { ...user, role });
-      navigate(getRoleBasedRoute(role));
+      login(access_token, { ...user, role: user.role });
+      navigate(getRoleBasedRoute(user.role));
     } catch (err) {
-      setError('Invalid credentials');
+      setError(err.response?.data?.message || 'Invalid credentials');
     } finally {
       setLoading(false);
     }
@@ -48,18 +48,7 @@ const Login = () => {
       required: true,
       label: 'Password'
     },
-    {
-      name: 'role',
-      type: 'select',
-      label: 'Role',
-      required: true,
-      defaultValue: 'user',
-      options: [
-        { value: 'user', label: 'End User' },
-        { value: 'company', label: 'Company Admin' },
-        { value: 'admin', label: 'System Admin' }
-      ]
-    }
+
   ];
 
   return (

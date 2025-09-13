@@ -10,111 +10,123 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('access_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// Auth
-export const createAccessToken = (email, password) => 
-  api.post('/auth/token', { email, password });
+// Authentication Endpoints
+export const signup = (userData) => 
+  api.post('/auth/signup', userData);
 
-export const verifyToken = (token) => 
-  api.post('/auth/verify', { token });
+export const login = (credentials) => 
+  api.post('/auth/login', credentials);
 
-// Users
-export const createUser = (userData) => 
-  api.post('/users', userData);
+export const verifyToken = () => 
+  api.get('/auth/verify-token');
 
-export const getUserByEmail = (email) => 
-  api.get(`/users/email/${email}`);
+// User Endpoints
+export const getUserProfile = () => 
+  api.get('/user/profile');
 
-export const getUserById = (id) => 
-  api.get(`/users/${id}`);
+export const updateUserProfile = (data) => 
+  api.put('/user/profile', data);
 
-export const updateUserProfile = (id, data) => 
-  api.put(`/users/${id}`, data);
+export const changePassword = (passwordData) => 
+  api.post('/user/change-password', passwordData);
 
-export const getUserSubscriptions = (userId) => 
-  api.get(`/users/${userId}/subscriptions`);
+export const getUserPlans = () => 
+  api.get('/user/plans');
 
-// Companies
-export const createCompany = (companyData) => 
-  api.post('/companies', companyData);
+export const getPlanById = (planId) => 
+  api.get(`/user/plans/${planId}`);
 
-export const getCompanyById = (id) => 
-  api.get(`/companies/${id}`);
+export const getUserSubscriptions = () => 
+  api.get('/user/subscriptions');
 
-export const updateCompany = (id, data) => 
-  api.put(`/companies/${id}`, data);
+export const getSubscriptionById = (subscriptionId) => 
+  api.get(`/user/subscriptions/${subscriptionId}`);
 
-export const getCompanyPlans = (companyId) => 
-  api.get(`/companies/${companyId}/plans`);
-
-export const getCompanyAnalytics = (companyId) => 
-  api.get(`/companies/${companyId}/analytics`);
-
-// Plans
-export const createPlan = (planData) => 
-  api.post('/plans', planData);
-
-export const getAllActivePlans = () => 
-  api.get('/plans/active');
-
-export const getPlanById = (id) => 
-  api.get(`/plans/${id}`);
-
-export const updatePlan = (id, data) => 
-  api.put(`/plans/${id}`, data);
-
-export const deletePlan = (id) => 
-  api.delete(`/plans/${id}`);
-
-// Subscriptions
 export const createSubscription = (subscriptionData) => 
-  api.post('/subscriptions', subscriptionData);
+  api.post('/user/subscriptions', subscriptionData);
 
-export const getSubscriptionById = (id) => 
-  api.get(`/subscriptions/${id}`);
+export const cancelSubscription = (subscriptionId, reason) => 
+  api.post(`/user/subscriptions/${subscriptionId}/cancel`, { reason });
 
-export const upgradeSubscription = (id, planId) => 
-  api.post(`/subscriptions/${id}/upgrade`, { planId });
-
-export const downgradeSubscription = (id, planId) => 
-  api.post(`/subscriptions/${id}/downgrade`, { planId });
-
-export const cancelSubscription = (id) => 
-  api.post(`/subscriptions/${id}/cancel`);
-
-export const renewSubscription = (id) => 
-  api.post(`/subscriptions/${id}/renew`);
-
-export const toggleAutoRenew = (id) => 
-  api.post(`/subscriptions/${id}/toggle-auto-renew`);
-
-// Discounts
-export const createDiscount = (discountData) => 
-  api.post('/discounts', discountData);
-
-export const getCompanyDiscounts = (companyId) => 
-  api.get(`/companies/${companyId}/discounts`);
+export const toggleAutoRenew = (subscriptionId, autoRenew) => 
+  api.put(`/user/subscriptions/${subscriptionId}/auto-renew`, { auto_renew: autoRenew });
 
 export const validateDiscountCode = (code) => 
-  api.post('/discounts/validate', { code });
+  api.post('/user/discounts/validate', { code });
 
-export const applyDiscount = (subscriptionId, discountCode) => 
-  api.post('/discounts/apply', { subscriptionId, discountCode });
+export const applyDiscount = (subscriptionId, code) => 
+  api.post(`/user/subscriptions/${subscriptionId}/apply-discount`, { code });
 
-// Analytics
-export const getPlanAnalytics = (planId) => 
-  api.get(`/plans/${planId}/analytics`);
+export const getUserNotifications = (limit = 50) => 
+  api.get(`/user/notifications?limit=${limit}`);
 
-export const getSystemAnalytics = () => 
-  api.get('/analytics/system');
+export const markNotificationRead = (notificationId) => 
+  api.put(`/user/notifications/${notificationId}/read`);
 
-export const getRevenuetrends = () => 
-  api.get('/analytics/revenue-trends');
+export const getUnreadNotificationCount = () => 
+  api.get('/user/notifications/unread-count');
+
+export const getUserDashboard = () => 
+  api.get('/user/dashboard');
+
+// Admin Endpoints
+export const getAdminDashboard = () => 
+  api.get('/admin/dashboard');
+
+export const getAdminUsers = () => 
+  api.get('/admin/users');
+
+export const getAdminUserById = (userId) => 
+  api.get(`/admin/users/${userId}`);
+
+export const updateAdminUser = (userId, data) => 
+  api.put(`/admin/users/${userId}`, data);
+
+export const deleteAdminUser = (userId) => 
+  api.delete(`/admin/users/${userId}`);
+
+export const getAdminPlans = () => 
+  api.get('/admin/plans');
+
+export const createAdminPlan = (planData) => 
+  api.post('/admin/plans', planData);
+
+export const updateAdminPlan = (planId, data) => 
+  api.put(`/admin/plans/${planId}`, data);
+
+export const deleteAdminPlan = (planId) => 
+  api.delete(`/admin/plans/${planId}`);
+
+export const getAdminSubscriptions = (status = 'all') => 
+  api.get(`/admin/subscriptions?status=${status}`);
+
+export const getAdminSubscriptionById = (subscriptionId) => 
+  api.get(`/admin/subscriptions/${subscriptionId}`);
+
+export const cancelAdminSubscription = (subscriptionId, reason) => 
+  api.post(`/admin/subscriptions/${subscriptionId}/cancel`, { reason });
+
+export const getAdminDiscounts = () => 
+  api.get('/admin/discounts');
+
+export const createAdminDiscount = (discountData) => 
+  api.post('/admin/discounts', discountData);
+
+export const sendAdminNotification = (notificationData) => 
+  api.post('/admin/notifications/send', notificationData);
+
+// Legacy exports for backward compatibility
+export const createUser = signup;
+export const getAllActivePlans = getUserPlans;
+export const createPlan = createAdminPlan;
+export const updatePlan = updateAdminPlan;
+export const deletePlan = deleteAdminPlan;
 
 export default api;
