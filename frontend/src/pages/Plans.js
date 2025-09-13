@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getUserPlans } from '../services/api';
 
@@ -6,6 +7,7 @@ const Plans = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -68,9 +70,9 @@ const Plans = () => {
               className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
               onClick={() => {
                 if (!user) {
-                  window.location.href = '/login';
+                  navigate('/login');
                 } else {
-                  window.location.href = `/subscribe?planId=${plan.plan_id}`;
+                  navigate(`/subscribe?planId=${plan.plan_id}`);
                 }
               }}
             >

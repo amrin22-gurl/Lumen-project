@@ -171,4 +171,5 @@ class ChatbotService {
   }
 }
 
-export default new ChatbotService();
+const chatbotService = new ChatbotService();
+export default chatbotService;

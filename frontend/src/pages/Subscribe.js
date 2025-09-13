@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getUserPlans, createSubscription, getPlanById } from '../services/api';
+import { createSubscription, getPlanById } from '../services/api';
 
 const Subscribe = () => {
   const [searchParams] = useSearchParams();
@@ -71,6 +71,7 @@ const Subscribe = () => {
       const response = await createSubscription(subscriptionData);
       
       if (response.data.success) {
+        // Redirect to subscription page after successful subscription
         navigate('/subscription', { 
           state: { 
             message: 'Subscription created successfully!',
