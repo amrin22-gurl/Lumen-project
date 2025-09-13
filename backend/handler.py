@@ -25,7 +25,7 @@ def fetch(query, params, one = False):
 
 
 def create_user(name, email, password_hash, role="customer"):
-    
+
     pass
 
 
