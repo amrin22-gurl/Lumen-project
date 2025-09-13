@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
-from handler import create_user, get_user_by_email, update_user
-from hashlib import sha256
-from flask_jwt_extended import create_access_token
+from handler import create_user, get_user_by_email, update_user, get_user_by_id
+import hashlib
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 
 auth = Blueprint('auth', __name__, url_prefix='/auth')
@@ -20,7 +20,7 @@ def signup():
     if get_user_by_email(email):
         return jsonify({'message': 'User already exists'}), 400
     
-    user_id = create_user(name, email, sha256(password.encode('utf-8')).hexdigest())
+    user_id = create_user(name, email, hashlib.sha256(password.encode('utf-8')).hexdigest())
     if user_id is not None:
         gotUser = get_user_by_email(email)
         if gotUser is None:
@@ -59,7 +59,7 @@ def login():
     
     user = get_user_by_email(email)
     
-    if user and user[3] == sha256(password.encode('utf-8')).hexdigest():
+    if user and user[3] == hashlib.sha256(password.encode('utf-8')).hexdigest():
         # Check if the user's role matches the requested role
         if user[4] != requested_role:
             return jsonify({'message': 'Invalid role selection for this account'}), 403
@@ -82,3 +82,29 @@ def login():
         }), 200
     
     return jsonify({'message': 'Invalid credentials'}), 401
+
+@auth.route('/verify-token', methods=['GET'])
+@jwt_required()
+def verify_token():
+    """Verify if the current token is valid"""
+    try:
+        identity = get_jwt_identity()
+        if identity:
+            user_id, role = identity.split(',')
+            user = get_user_by_id(int(user_id))
+            if user:
+                user_data = {
+                    'user_id': user[0],
+                    'name': user[1],
+                    'email': user[2],
+                    'role': user[4]
+                }
+                return jsonify({
+                    'valid': True,
+                    'user': user_data
+                }), 200
+        
+        return jsonify({'valid': False}), 401
+        
+    except Exception as e:
+        return jsonify({'valid': False, 'message': str(e)}), 401

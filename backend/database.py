@@ -31,8 +31,7 @@ CREATE TABLE IF NOT EXISTS plans (
     price REAL NOT NULL,
     duration_months INTEGER NOT NULL,
     features TEXT,
-    is_active INTEGER DEFAULT 1,
-    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE
+    is_active INTEGER DEFAULT 1
 );
 
 -- 4) Subscriptions
@@ -75,14 +74,12 @@ CREATE TABLE IF NOT EXISTS billing_information (
 -- 7) Discounts
 CREATE TABLE IF NOT EXISTS discounts (
     discount_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    company_id INTEGER NOT NULL,
     code TEXT UNIQUE NOT NULL,
     description TEXT,
     percentage REAL,
     valid_from TEXT,
     valid_until TEXT,
-    is_active INTEGER DEFAULT 1,
-    FOREIGN KEY (company_id) REFERENCES companies(company_id)
+    is_active INTEGER DEFAULT 1
 );
 
 -- 8) Applied Discounts
@@ -107,8 +104,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     FOREIGN KEY (subscription_id) REFERENCES subscriptions(subscription_id)
 );
 
--- Insert default company
-INSERT INTO companies (name, description, owner_id) VALUES ('TelecomCo', 'Default company for imported dataset', NULL);
+
 """)
 
 # -------------------------
