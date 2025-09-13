@@ -20,9 +20,20 @@ const Navbar = () => {
             </Link>
             {user ? (
               <>
-                <Link to="/subscription" className="text-gray-700 hover:text-blue-600">
-                  My Subscription
-                </Link>
+                {user.role === 'admin' ? (
+                  <>
+                    <Link to="/admin-dashboard" className="text-gray-700 hover:text-blue-600">
+                      Dashboard
+                    </Link>
+                    <Link to="/admin-plans" className="text-gray-700 hover:text-blue-600">
+                      Manage Plans
+                    </Link>
+                  </>
+                ) : (
+                  <Link to="/subscription" className="text-gray-700 hover:text-blue-600">
+                    My Subscription
+                  </Link>
+                )}
                 <span className="text-gray-700">Welcome, {user.name}</span>
                 <button
                   onClick={logout}
