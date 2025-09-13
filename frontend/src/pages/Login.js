@@ -18,10 +18,17 @@ const Login = () => {
     const formData = new FormData(e.target);
     const email = formData.get('email');
     const password = formData.get('password');
+    const selectedRole = formData.get('role');
 
     try {
-      const response = await apiLogin({ email, password });
+      const response = await apiLogin({ email, password, role: selectedRole });
       const { access_token, user } = response.data;
+      
+      // Verify the user's actual role matches the selected role
+      if (user.role !== selectedRole) {
+        setError('Invalid role selection for this account');
+        return;
+      }
       
       login(access_token, { ...user, role: user.role });
       navigate(getRoleBasedRoute(user.role));
@@ -47,7 +54,17 @@ const Login = () => {
       required: true,
       label: 'Password'
     },
-
+    {
+      name: 'role',
+      type: 'select',
+      label: 'Login As',
+      required: true,
+      defaultValue: 'customer',
+      options: [
+        { value: 'customer', label: 'Customer' },
+        { value: 'admin', label: 'Admin' }
+      ]
+    }
   ];
 
   return (

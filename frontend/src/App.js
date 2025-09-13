@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import Chatbot from './components/Chatbot';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -10,6 +11,7 @@ import Plans from './pages/Plans';
 import Subscription from './pages/Subscription';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminPlans from './pages/AdminPlans';
+import ChatSupport from './pages/ChatSupport';
 
 function App() {
   return (
@@ -26,9 +28,11 @@ function App() {
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/admin-dashboard" element={<AdminDashboard />} />
               <Route path="/admin-plans" element={<AdminPlans />} />
+              <Route path="/support" element={<ChatSupport />} />
             </Routes>
           </main>
           <Footer />
+          <Chatbot />
         </div>
       </Router>
     </AuthProvider>

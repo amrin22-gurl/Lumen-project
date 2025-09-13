@@ -18,6 +18,9 @@ const Navbar = () => {
             <Link to="/plans" className="text-gray-700 hover:text-blue-600">
               Plans
             </Link>
+            <Link to="/support" className="text-gray-700 hover:text-blue-600">
+              Support
+            </Link>
             {user ? (
               <>
                 {user.role === 'admin' ? (
