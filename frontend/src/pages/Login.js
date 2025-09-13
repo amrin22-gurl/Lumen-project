@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { login as apiLogin } from '../services/api';
 import AuthForm from '../components/AuthForm';
+
+// Mock credentials
+const MOCK_USERS = {
+  'admin@telecom.com': { password: 'admin123', role: 'admin', name: 'Admin User' },
+  'user@telecom.com': { password: 'user123', role: 'customer', name: 'Customer User' }
+};
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -20,23 +25,34 @@ const Login = () => {
     const password = formData.get('password');
     const selectedRole = formData.get('role');
 
-    try {
-      const response = await apiLogin({ email, password, role: selectedRole });
-      const { access_token, user } = response.data;
-      
-      // Verify the user's actual role matches the selected role
-      if (user.role !== selectedRole) {
-        setError('Invalid role selection for this account');
-        return;
-      }
-      
-      login(access_token, { ...user, role: user.role });
-      navigate(getRoleBasedRoute(user.role));
-    } catch (err) {
-      setError(err.response?.data?.message || 'Invalid credentials');
-    } finally {
+    // Mock authentication
+    const mockUser = MOCK_USERS[email];
+    if (!mockUser || mockUser.password !== password) {
+      setError('Invalid email or password');
       setLoading(false);
+      return;
     }
+
+    if (mockUser.role !== selectedRole) {
+      setError('Invalid role selection for this account');
+      setLoading(false);
+      return;
+    }
+
+    // Simulate API delay
+    setTimeout(() => {
+      const mockToken = 'mock_token_' + Date.now();
+      const userData = {
+        id: email,
+        email: email,
+        name: mockUser.name,
+        role: mockUser.role
+      };
+      
+      login(mockToken, userData);
+      navigate(getRoleBasedRoute(mockUser.role));
+      setLoading(false);
+    }, 500);
   };
 
   const fields = [
